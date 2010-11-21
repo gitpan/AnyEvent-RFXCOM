@@ -1,0 +1,30 @@
+---
+abstract: 'Perl modules for RFXCOM RF receivers/transmitters with AnyEvent'
+author:
+  - 'Mark Hindess <soft-cpan@temporalanomaly.com>'
+build_requires:
+  English: 0
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.102341, CPAN::Meta::Converter version 2.101670'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: AnyEvent-RFXCOM
+requires:
+  AnyEvent: 5.271
+  AnyEvent::Handle: 0
+  AnyEvent::Socket: 0
+  Carp: 0
+  Device::RFXCOM::RX: 0
+  Device::RFXCOM::TX: 0
+  Device::W800: 0
+  constant: 0
+  perl: 5.010
+resources:
+  bugtracker: http://github.com/beanz/anyevent-rfxcom-perl/issues
+  repository: git://github.com/beanz/anyevent-rfxcom-perl.git
+version: 1.103250
