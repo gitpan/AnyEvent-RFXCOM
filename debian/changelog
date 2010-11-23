@@ -1,6 +1,17 @@
+libanyevent-rfxcom-perl (1.103270-2) unstable; urgency=low
+
+ * Fix test after Device::RFXCOM change.
+
+ -- Mark Hindess <soft-debian@temporalanomaly.com>  Tue, 23 Nov 2010 23:25:42 +0000
+
+libanyevent-rfxcom-perl (1.103240-2) unstable; urgency=low
+
+  * Fix depends.
+
+ -- Mark Hindess <soft-debian@temporalanomaly.com>  Sun, 21 Nov 2010 13:22:48 +0000
+
 libanyevent-rfxcom-perl (1.103240-1) unstable; urgency=low
 
   * Initial CPAN release.
 
- -- Mark Hindess <soft-debian@temporalanomaly.com>  Sat, 20 Nov 2010 20:57:13 +0000
-
+ -- Mark Hindess <soft-debian@temporalanomaly.com>  Sun, 21 Nov 2010 13:00:22 +0000

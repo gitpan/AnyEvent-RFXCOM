@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package AnyEvent::RFXCOM::RX;
 BEGIN {
-  $AnyEvent::RFXCOM::RX::VERSION = '1.103250';
+  $AnyEvent::RFXCOM::RX::VERSION = '1.103270';
 }
 
 # ABSTRACT: AnyEvent module for an RFXCOM receiver
@@ -107,7 +107,7 @@ AnyEvent::RFXCOM::RX - AnyEvent module for an RFXCOM receiver
 
 =head1 VERSION
 
-version 1.103250
+version 1.103270
 
 =head1 SYNOPSIS
 
