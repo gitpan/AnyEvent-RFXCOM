@@ -4,6 +4,8 @@ author:
   - 'Mark Hindess <soft-cpan@temporalanomaly.com>'
 build_requires:
   English: 0
+  Exporter: 0
+  File::Temp: 0
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.31
@@ -28,4 +30,4 @@ requires:
 resources:
   bugtracker: http://github.com/beanz/anyevent-rfxcom-perl/issues
   repository: git://github.com/beanz/anyevent-rfxcom-perl.git
-version: 1.103270
+version: 1.103390

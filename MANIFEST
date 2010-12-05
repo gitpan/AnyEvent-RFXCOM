@@ -22,6 +22,7 @@ lib/AnyEvent/W800.pm
 t/01-rx.t
 t/01-tx.t
 t/02-w800.t
+t/Helpers.pm
 t/author-critic.t
 t/release-eol.t
 t/release-kwalitee.t

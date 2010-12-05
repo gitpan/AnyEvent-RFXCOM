@@ -13,6 +13,8 @@ my %WriteMakefileArgs = (
   'AUTHOR' => 'Mark Hindess <soft-cpan@temporalanomaly.com>',
   'BUILD_REQUIRES' => {
     'English' => '0',
+    'Exporter' => '0',
+    'File::Temp' => '0',
     'Test::More' => '0'
   },
   'CONFIGURE_REQUIRES' => {
@@ -37,7 +39,7 @@ my %WriteMakefileArgs = (
     'Device::W800' => '0',
     'constant' => '0'
   },
-  'VERSION' => '1.103270',
+  'VERSION' => '1.103390',
   'test' => {
     'TESTS' => 't/*.t'
   }

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package AnyEvent::RFXCOM::TX;
 BEGIN {
-  $AnyEvent::RFXCOM::TX::VERSION = '1.103270';
+  $AnyEvent::RFXCOM::TX::VERSION = '1.103390';
 }
 
 # ABSTRACT: AnyEvent module for an RFXCOM transmitter
@@ -26,24 +26,26 @@ sub _handle_setup {
   $handle->on_drain(sub {
     return unless (defined $handle);
     print STDERR $handle.": on drain\n" if DEBUG;
+    $handle->rtimeout_reset();
     $handle->rtimeout($self->{ack_timeout});
-    $handle->push_read(chunk => 1,
-      sub {
-        my ($handle, $data) = @_;
-        $handle->rtimeout(0);
-        $self->{callback}->($data) if ($self->{callback});
-        print STDERR $handle.": read ",
-          (unpack 'H*', $data), "\n" if DEBUG;
-        my $wait_record = $self->{_waiting};
-        if ($wait_record) {
-          my ($time, $rec) = @$wait_record;
-          push @{$rec->{result}}, $data;
-          my $cv = $rec->{cv};
-          $cv->end if ($cv);
-        }
-        $self->_write_now();
-        return;
-      });
+  });
+  $handle->on_read(sub {
+    my ($handle) = @_;
+    $handle->rtimeout(0);
+    my $rbuf = \$handle->{rbuf};
+    my $data = $$rbuf;
+    $$rbuf = '';
+    $self->{callback}->($data) if ($self->{callback});
+    print STDERR $handle.": read ", (unpack 'H*', $data), "\n" if DEBUG;
+    my $wait_record = $self->{_waiting};
+    if ($wait_record) {
+      my ($time, $rec) = @$wait_record;
+      push @{$rec->{result}}, $data;
+      my $cv = $rec->{cv};
+      $cv->end if ($cv);
+    }
+    $self->_write_now();
+    return;
   });
   1;
 }
@@ -94,7 +96,7 @@ AnyEvent::RFXCOM::TX - AnyEvent module for an RFXCOM transmitter
 
 =head1 VERSION
 
-version 1.103270
+version 1.103390
 
 =head1 SYNOPSIS
 
