@@ -14,7 +14,7 @@ AnyEvent::RFXCOM - Perl modules for RFXCOM RF receivers/transmitters with AnyEve
 
 =head1 VERSION
 
-version 1.110430
+version 1.110431
 
 =head1 SYNOPSIS
 

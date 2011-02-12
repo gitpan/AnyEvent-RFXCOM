@@ -21,7 +21,7 @@ requires:
   AnyEvent::Handle: 0
   AnyEvent::Socket: 0
   Carp: 0
-  Device::RFXCOM: 1.103250
+  Device::RFXCOM::Base: 1.103250
   Device::RFXCOM::RX: 0
   Device::RFXCOM::TX: 0
   Device::W800: 0
@@ -30,4 +30,4 @@ requires:
 resources:
   bugtracker: http://github.com/beanz/anyevent-rfxcom-perl/issues
   repository: git://github.com/beanz/anyevent-rfxcom-perl.git
-version: 1.110430
+version: 1.110431

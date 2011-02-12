@@ -33,13 +33,13 @@ my %WriteMakefileArgs = (
     'AnyEvent::Handle' => '0',
     'AnyEvent::Socket' => '0',
     'Carp' => '0',
-    'Device::RFXCOM' => '1.103250',
+    'Device::RFXCOM::Base' => '1.103250',
     'Device::RFXCOM::RX' => '0',
     'Device::RFXCOM::TX' => '0',
     'Device::W800' => '0',
     'constant' => '0'
   },
-  'VERSION' => '1.110430',
+  'VERSION' => '1.110431',
   'test' => {
     'TESTS' => 't/*.t'
   }
