@@ -26,8 +26,8 @@ requires:
   Device::RFXCOM::TX: 0
   Device::W800: 0
   constant: 0
-  perl: 5.010
+  perl: 5.008
 resources:
   bugtracker: http://github.com/beanz/anyevent-rfxcom-perl/issues
   repository: git://github.com/beanz/anyevent-rfxcom-perl.git
-version: 1.103390
+version: 1.110430

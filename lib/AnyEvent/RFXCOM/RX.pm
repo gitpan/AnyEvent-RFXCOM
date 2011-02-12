@@ -2,13 +2,13 @@ use strict;
 use warnings;
 package AnyEvent::RFXCOM::RX;
 BEGIN {
-  $AnyEvent::RFXCOM::RX::VERSION = '1.103390';
+  $AnyEvent::RFXCOM::RX::VERSION = '1.110430';
 }
 
 # ABSTRACT: AnyEvent module for an RFXCOM receiver
 
 
-use 5.010;
+use 5.008;
 use constant DEBUG => $ENV{ANYEVENT_RFXCOM_RX_DEBUG};
 use base qw/AnyEvent::RFXCOM::Base Device::RFXCOM::RX/;
 use AnyEvent;
@@ -107,7 +107,7 @@ AnyEvent::RFXCOM::RX - AnyEvent module for an RFXCOM receiver
 
 =head1 VERSION
 
-version 1.103390
+version 1.110430
 
 =head1 SYNOPSIS
 
