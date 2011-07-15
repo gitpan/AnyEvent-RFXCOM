@@ -12,9 +12,8 @@ my %WriteMakefileArgs = (
   'ABSTRACT' => 'Perl modules for RFXCOM RF receivers/transmitters with AnyEvent',
   'AUTHOR' => 'Mark Hindess <soft-cpan@temporalanomaly.com>',
   'BUILD_REQUIRES' => {
+    'AnyEvent::MockTCPServer' => '0',
     'English' => '0',
-    'Exporter' => '0',
-    'File::Temp' => '0',
     'Test::More' => '0'
   },
   'CONFIGURE_REQUIRES' => {
@@ -22,9 +21,9 @@ my %WriteMakefileArgs = (
   },
   'DISTNAME' => 'AnyEvent-RFXCOM',
   'EXE_FILES' => [
-    'bin/rfxcom-anyevent-tx',
+    'bin/rfxcom-anyevent-rx',
     'bin/w800-anyevent-rx',
-    'bin/rfxcom-anyevent-rx'
+    'bin/rfxcom-anyevent-tx'
   ],
   'LICENSE' => 'perl',
   'NAME' => 'AnyEvent::RFXCOM',
@@ -37,9 +36,11 @@ my %WriteMakefileArgs = (
     'Device::RFXCOM::RX' => '0',
     'Device::RFXCOM::TX' => '0',
     'Device::W800' => '0',
+    'Scalar::Util' => '0',
+    'Sub::Name' => '0',
     'constant' => '0'
   },
-  'VERSION' => '1.110431',
+  'VERSION' => '1.111960',
   'test' => {
     'TESTS' => 't/*.t'
   }

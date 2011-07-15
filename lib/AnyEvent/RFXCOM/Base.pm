@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package AnyEvent::RFXCOM::Base;
 BEGIN {
-  $AnyEvent::RFXCOM::Base::VERSION = '1.110431';
+  $AnyEvent::RFXCOM::Base::VERSION = '1.111960';
 }
 
 # ABSTRACT: module for AnyEvent RFXCOM base class
@@ -15,38 +15,51 @@ use constant {
 
 use AnyEvent::Handle;
 use AnyEvent::Socket;
+use Sub::Name;
+use Scalar::Util qw/weaken/;
 
 sub _open_condvar {
   my $self = shift;
   my $cv = AnyEvent->condvar;
-  $cv->cb(sub {
+  my $weak_self = $self;
+  weaken $weak_self;
+
+  $cv->cb(subname 'open_cb' => sub {
             my $fh = $_[0]->recv;
             print STDERR "start cb $fh @_\n" if DEBUG;
             my $handle; $handle =
               AnyEvent::Handle->new(
                 fh => $fh,
-                on_error => sub {
+                on_error => subname('on_error' => sub {
                   my ($handle, $fatal, $msg) = @_;
                   print STDERR $handle.": error $msg\n" if DEBUG;
                   $handle->destroy;
                   if ($fatal) {
-                    $self->cleanup($msg);
+                    $weak_self->cleanup($msg);
                   }
-                },
-                on_eof => sub {
+                }),
+                on_eof => subname('on_eof' => sub {
                   my ($handle) = @_;
                   print STDERR $handle.": eof\n" if DEBUG;
                   $handle->destroy;
-                  $self->cleanup('connection closed');
-                },
+                  $weak_self->cleanup('connection closed');
+                }),
               );
-            $self->{handle} = $handle;
-            $self->_handle_setup();
-            delete $self->{_waiting}; # uncork queued writes
-            $self->_write_now();
+            $weak_self->{handle} = $handle;
+            $weak_self->_handle_setup();
+            delete $weak_self->{_waiting}; # uncork queued writes
+            $weak_self->_write_now();
           });
-  $self->{_waiting} = { desc => 'fake for async open' };
+  $weak_self->{_waiting} = { desc => 'fake for async open' };
   return $cv;
+}
+
+
+sub cleanup {
+  my $self = shift;
+  print STDERR $self."->cleanup\n" if DEBUG;
+  $self->{handle}->destroy if ($self->{handle});
+  delete $self->{handle};
 }
 
 sub _open_tcp_port {
@@ -56,7 +69,7 @@ sub _open_tcp_port {
   require AnyEvent::Socket; import AnyEvent::Socket;
   my ($host, $port) = split /:/, $dev, 2;
   $port = $self->{port} unless (defined $port);
-  $self->{sock} = tcp_connect $host, $port, sub {
+  $self->{sock} = tcp_connect $host, $port, subname 'tcp_connect_cb' => sub {
     my $fh = shift
       or do {
         my $err = (ref $self).": Can't connect to device $dev: $!";
@@ -93,15 +106,22 @@ AnyEvent::RFXCOM::Base - module for AnyEvent RFXCOM base class
 
 =head1 VERSION
 
-version 1.110431
+version 1.111960
 
 =head1 SYNOPSIS
 
-  ... abstract base class
+  # ... abstract base class
 
 =head1 DESCRIPTION
 
 Module for AnyEvent RFXCOM base class.
+
+=head1 METHODS
+
+=head2 C<cleanup()>
+
+This method attempts to destroy any resources in the event of a
+disconnection or fatal error.
 
 =head1 THANKS
 
@@ -122,7 +142,7 @@ Mark Hindess <soft-cpan@temporalanomaly.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Mark Hindess.
+This software is copyright (c) 2011 by Mark Hindess.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

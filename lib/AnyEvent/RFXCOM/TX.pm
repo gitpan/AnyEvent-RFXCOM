@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package AnyEvent::RFXCOM::TX;
 BEGIN {
-  $AnyEvent::RFXCOM::TX::VERSION = '1.110431';
+  $AnyEvent::RFXCOM::TX::VERSION = '1.111960';
 }
 
 # ABSTRACT: AnyEvent module for an RFXCOM transmitter
@@ -13,38 +13,44 @@ use constant DEBUG => $ENV{ANYEVENT_RFXCOM_TX_DEBUG};
 use base qw/AnyEvent::RFXCOM::Base Device::RFXCOM::TX/;
 use AnyEvent;
 use Carp qw/croak/;
+use Sub::Name;
+use Scalar::Util qw/weaken/;
 
 
 sub _handle_setup {
   my $self = shift;
   my $handle = $self->{handle};
-  $handle->on_rtimeout(sub {
+  my $weak_self = $self;
+  weaken $weak_self;
+  $handle->on_rtimeout(subname 'on_rtimeout_cb' => sub {
+    my ($handle) = @_;
     print STDERR $handle.": no ack\n" if DEBUG;
     $handle->rtimeout(0);
-    $self->_init_mode();
+    $weak_self->_init_mode();
   });
-  $handle->on_drain(sub {
+  $handle->on_drain(subname 'on_drain_cb' => sub {
+    my ($handle) = @_;
     return unless (defined $handle);
     print STDERR $handle.": on drain\n" if DEBUG;
     $handle->rtimeout_reset();
-    $handle->rtimeout($self->{ack_timeout});
+    $handle->rtimeout($weak_self->{ack_timeout});
   });
-  $handle->on_read(sub {
+  $handle->on_read(subname 'on_read_cb' => sub {
     my ($handle) = @_;
     $handle->rtimeout(0);
     my $rbuf = \$handle->{rbuf};
     my $data = $$rbuf;
     $$rbuf = '';
-    $self->{callback}->($data) if ($self->{callback});
+    $weak_self->{callback}->($data) if ($weak_self->{callback});
     print STDERR $handle.": read ", (unpack 'H*', $data), "\n" if DEBUG;
-    my $wait_record = $self->{_waiting};
+    my $wait_record = $weak_self->{_waiting};
     if ($wait_record) {
       my ($time, $rec) = @$wait_record;
       push @{$rec->{result}}, $data;
       my $cv = $rec->{cv};
       $cv->end if ($cv);
     }
-    $self->_write_now();
+    $weak_self->_write_now();
     return;
   });
   1;
@@ -54,7 +60,9 @@ sub transmit {
   my $self = shift;
   my $cv = AnyEvent->condvar;
   my $res = [];
-  $cv->cb(sub { $cv->send($res->[0]) });
+  my $weak_cv = $cv;
+  weaken $weak_cv;
+  $cv->cb(subname 'transmit_cb' => sub { $weak_cv->send($res->[0]) });
   $self->SUPER::transmit(args => [ cv => $cv, result => $res ], @_);
   return $cv;
 }
@@ -79,7 +87,7 @@ sub DESTROY {
 
 sub cleanup {
   my ($self, $error) = @_;
-  print STDERR $self."->cleanup\n" if DEBUG;
+  $self->SUPER::cleanup(@_);
   undef $self->{discard_timer};
   undef $self->{dup_timer};
 }
@@ -96,7 +104,7 @@ AnyEvent::RFXCOM::TX - AnyEvent module for an RFXCOM transmitter
 
 =head1 VERSION
 
-version 1.110431
+version 1.111960
 
 =head1 SYNOPSIS
 
@@ -185,7 +193,7 @@ Mark Hindess <soft-cpan@temporalanomaly.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Mark Hindess.
+This software is copyright (c) 2011 by Mark Hindess.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

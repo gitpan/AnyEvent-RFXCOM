@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package AnyEvent::RFXCOM::RX;
 BEGIN {
-  $AnyEvent::RFXCOM::RX::VERSION = '1.110431';
+  $AnyEvent::RFXCOM::RX::VERSION = '1.111960';
 }
 
 # ABSTRACT: AnyEvent module for an RFXCOM receiver
@@ -13,6 +13,8 @@ use constant DEBUG => $ENV{ANYEVENT_RFXCOM_RX_DEBUG};
 use base qw/AnyEvent::RFXCOM::Base Device::RFXCOM::RX/;
 use AnyEvent;
 use Carp qw/croak/;
+use Sub::Name;
+use Scalar::Util qw/weaken/;
 
 
 sub new {
@@ -25,22 +27,26 @@ sub new {
 sub _handle_setup {
   my $self = shift;
   my $handle = $self->{handle};
-  $handle->on_rtimeout(sub {
+  my $weak_self = $self;
+  weaken $weak_self;
+  $handle->on_rtimeout(subname 'on_rtimeout_cb' => sub {
+    my ($handle) = @_;
     my $rbuf = \$handle->{rbuf};
     print STDERR $handle, ": discarding '",
       (unpack 'H*', $$rbuf), "'\n" if DEBUG;
     $$rbuf = '';
     $handle->rtimeout(0);
   });
-  $handle->on_timeout(sub {
+  $handle->on_timeout(subname 'on_timeout_cb' => sub {
+    my ($handle) = @_;
     print STDERR $handle.": Clearing duplicate cache\n" if DEBUG;
-    $self->{_cache} = {};
+    $weak_self->{_cache} = {};
     $handle->timeout(0);
   });
   $handle->push_read(ref $self => $self,
-                     sub {
-                       $self->{callback}->(@_);
-                       $self->_write_now();
+                     subname 'push_read_cb' => sub {
+                       $weak_self->{callback}->(@_);
+                       $weak_self->_write_now();
                        return;
                      });
   1;
@@ -66,7 +72,7 @@ sub DESTROY {
 
 sub cleanup {
   my ($self, $error) = @_;
-  print STDERR $self."->cleanup\n" if DEBUG;
+  $self->SUPER::cleanup(@_);
   undef $self->{discard_timer};
   undef $self->{dup_timer};
 }
@@ -75,13 +81,17 @@ sub cleanup {
 sub anyevent_read_type {
   my ($handle, $cb, $self) = @_;
 
-  sub {
+  my $weak_self = $self;
+  weaken $weak_self;
+
+  subname 'anyevent_read_type_reader' => sub {
+    my ($handle) = @_;
     my $rbuf = \$handle->{rbuf};
-    $handle->rtimeout($self->{discard_timeout});
-    $handle->timeout($self->{dup_timeout});
+    $handle->rtimeout($weak_self->{discard_timeout});
+    $handle->timeout($weak_self->{dup_timeout});
     while (1) { # read all message from the buffer
       print STDERR "Before: ", (unpack 'H*', $$rbuf||''), "\n" if DEBUG;
-      my $res = $self->read_one($rbuf);
+      my $res = $weak_self->read_one($rbuf);
       unless ($res) {
         if (defined $res) {
           print STDERR "Ignoring duplicate\n" if DEBUG;
@@ -107,7 +117,7 @@ AnyEvent::RFXCOM::RX - AnyEvent module for an RFXCOM receiver
 
 =head1 VERSION
 
-version 1.110431
+version 1.111960
 
 =head1 SYNOPSIS
 
@@ -173,7 +183,7 @@ Mark Hindess <soft-cpan@temporalanomaly.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Mark Hindess.
+This software is copyright (c) 2011 by Mark Hindess.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
